@@ -34,6 +34,18 @@
   color: var(--dsw-alias-brand-primary);
 }
 
+.topActions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.searchEntry {
+  width: 34px;
+  height: 34px;
+}
+
 .newChat {
   position: relative;
   display: flex;
@@ -190,6 +202,11 @@
   border: 1px solid var(--dsw-alias-border-l2);
   background: var(--dsw-alias-bg-layer-3);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.collapsedGroup .searchEntry {
+  width: 34px;
+  height: 34px;
 }
 
 .drawer {

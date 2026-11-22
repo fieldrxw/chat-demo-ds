@@ -11,6 +11,7 @@ import { IconButton } from '../base/IconButton.js'
 import { Modal } from '../base/Modal.js'
 import { showToast } from '../base/toastState.js'
 import { openSettings } from '../settings/settingsDialogState.js'
+import { ChatSearchButton } from '../chatSearch/ChatSearchPanel.js'
 import { closeMobileSider, useMobileSider } from './mobileSiderState.js'
 import { SessionItem } from './SessionItem.js'
 import styles from './Sider.module.css'
@@ -53,13 +54,16 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
     <div className={clsx(styles.sider, mobile && styles.mobile)}>
       <div className={styles.top}>
         <div className={styles.appName}>{t('appName')}</div>
-        <IconButton
-          size="m"
-          icon={<IconPanelLeftOutline16 />}
-          tooltip={t('collapseSiderbarButton')}
-          tooltipPlacement="bottom"
-          onClick={() => (mobile ? closeMobileSider() : setSiderCollapsed(true))}
-        />
+        <div className={styles.topActions}>
+          <ChatSearchButton className={styles.searchEntry} />
+          <IconButton
+            size="m"
+            icon={<IconPanelLeftOutline16 />}
+            tooltip={t('collapseSiderbarButton')}
+            tooltipPlacement="bottom"
+            onClick={() => (mobile ? closeMobileSider() : setSiderCollapsed(true))}
+          />
+        </div>
       </div>
       <button
         type="button"

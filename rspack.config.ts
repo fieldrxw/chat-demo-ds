@@ -82,7 +82,11 @@ export const createConfig = ({
     }),
     new rspack.DefinePlugin({ __API_ORIGIN__: JSON.stringify(apiOrigin) }),
     new rspack.CopyRspackPlugin({
-      patterns: [{ from: path.resolve(root, 'LICENSE'), to: 'LICENSE', toType: 'file' }],
+      patterns: [
+        { from: path.resolve(root, 'LICENSE'), to: 'LICENSE', toType: 'file' },
+        // 部署级默认端点配置；部署者替换 dist 中的 config.js 即可预置默认端点
+        { from: path.resolve(root, 'config.js'), to: 'config.js', toType: 'file' },
+      ],
     }),
   ],
   performance: { hints: false },

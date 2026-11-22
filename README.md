@@ -27,6 +27,33 @@ pnpm build
 
 The output is written to `dist/`. Deploy it to a static web server or open `dist/index.html` directly. Opening the file directly requires browser support for storage on `file://` pages and an API service that permits their cross-origin requests.
 
+## Custom endpoints and local proxy
+
+By default the page talks to the official API, but it can also connect to any third-party compatible gateway that serves Anthropic Messages protocol routes:
+
+- **UI configuration**: click the floating gear button at the bottom-right corner to open the endpoint panel. There you can fill in the verify origin (model list `GET {verify origin}/models`), the chat origin (streaming chat `POST {chat origin}/anthropic/v1/messages`; leave empty to reuse the verify origin), and the model name (empty falls back to `deepseek-flash`; the panel tries to fetch a model list as suggestions, and manual input works even if fetching fails). Enter gateway base URLs; trailing slashes are stripped automatically. "Save and reload" applies immediately; "Clear UI config" falls back to the deployment default or the official default.
+- **Deployment-level defaults**: the build copies `config.js` to `dist/config.js` (loaded with `defer`). Deployers can replace that file to preconfigure endpoints so end users need no setup:
+
+  ```js
+  window.ChatDemoDeploymentConfig = {
+    verifyOrigin: 'https://gateway.example.com',
+    chatOrigin: '', // empty means same as verify origin
+    model: '',
+  }
+  ```
+
+  Priority: UI config > `config.js` deployment default > official default (`https://api.deepseek.com`).
+
+When the third-party service does not allow cross-origin requests, use the zero-dependency proxy script in the repository root to serve the page and the API from the same origin:
+
+```sh
+node proxy.mjs --dir dist --port 8080                # host dist and forward to the official upstream
+node proxy.mjs --dir dist --upstream https://gateway.example.com
+node proxy.mjs --upstream https://gateway.example.com  # forwarding-only mode, works with any static server
+```
+
+The upstream is HTTPS while the local listener is HTTP. The proxy adds CORS headers to upstream responses and short-circuits preflight requests, and streaming (SSE) responses are piped through chunk by chunk. Options can also be set via `PROXY_UPSTREAM` / `PROXY_DIR` / `PROXY_PORT`. Chat requires the third-party endpoint to support the Anthropic Messages streaming protocol; OpenAI-protocol-only endpoints are out of scope.
+
 ## Features
 
 - Multiple conversations with automatic titles, renaming, and deletion; edit prompts, regenerate replies, and switch between message branches.

@@ -11,6 +11,12 @@ import {
 } from '../services/chat/store.js'
 import { SearchPanel } from '../components/search/SearchPanel.js'
 import { closeSearchPanel } from '../components/search/searchPanelState.js'
+import { ChatSearchPanel } from '../components/chatSearch/ChatSearchPanel.js'
+import { closeChatSearch } from '../components/chatSearch/chatSearchState.js'
+import { EndpointButton } from '../components/endpoint/EndpointButton.js'
+import { EndpointPanel } from '../components/endpoint/EndpointPanel.js'
+import { useEndpointPanel, closeEndpointPanel } from '../components/endpoint/endpointPanelState.js'
+import { invalidateLocateExcept } from '../services/chat/locate.js'
 import { SessionView } from '../components/session/SessionView.js'
 import { MobileHeader } from '../components/session/MobileHeader.js'
 import { Welcome } from '../components/session/Welcome.js'
@@ -62,6 +68,12 @@ export const App = () => {
 
   // 搜索结果面板只属于当前会话
   useEffect(closeSearchPanel, [activeId])
+  // 会话全文检索面板与端点面板不属于任何会话，切换会话时一并收起
+  useEffect(closeChatSearch, [activeId])
+  useEffect(closeEndpointPanel, [activeId])
+  const endpointPanelOpen = useEndpointPanel((state) => state.open)
+  // 上一个会话的定位目标随会话切换作废；新会话的待定位目标保留，等消息渲染后消费
+  useEffect(() => invalidateLocateExcept(activeId), [activeId])
   // 切换会话时停止朗读
   useEffect(stopReadAloud, [activeId])
   // 移动端选中会话、切换布局后收起抽屉
@@ -131,6 +143,9 @@ export const App = () => {
           </div>
         </main>
         <SearchPanel />
+        <ChatSearchPanel />
+        <EndpointButton />
+        {endpointPanelOpen ? <EndpointPanel /> : null}
       </div>
       <SettingsDialog />
       <Toast />

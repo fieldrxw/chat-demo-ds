@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createId } from '../../utils/id.js'
 import { ApiError, streamMessage } from '../api/client.js'
 import type { ChatModel, CreateMessageRequest } from '../api/types.js'
+import { resolvedModel } from '../config/endpoint.js'
 import { extractFileIds, getFileErrorCode, isRetryableApiError } from '../api/errors.js'
 import {
   cancelUpload,
@@ -38,8 +39,10 @@ import {
   type UserMessage,
 } from './types.js'
 
-/** deepseek-flash 同时支持深度思考与图片输入 */
+/** deepseek-flash 同时支持深度思考与图片输入；端点面板未配置模型时的应用默认 */
 const MODEL: ChatModel = 'deepseek-flash'
+/** 请求模型：界面/部署配置的模型优先，留空回退应用默认（FR-2） */
+const requestModel = (): string => resolvedModel() ?? MODEL
 /** 所有生成请求统一携带的助手身份说明 */
 const SYSTEM_PROMPT = '该助手为DeepSeek，由深度求索公司创造。'
 /** 保留最近打开的详情；当前会话、生成中及尚未成功保存的会话不淘汰。 */
@@ -266,7 +269,7 @@ const createReply = (): AssistantMessage => {
     id: createId(),
     role: 'assistant',
     createdAt: Date.now(),
-    model: MODEL,
+    model: resolvedModel() as ChatModel | null,
     thinking,
     search,
     prefix: true,
@@ -716,8 +719,8 @@ export const continueReply = (sessionId: string, messageId: string) => {
   const { thinking, search } = useSettings.getState()
   const reply: AssistantMessage = {
     ...previous,
-    // 未记录请求配置的回复，续写时使用默认模型和当前开关。
-    model: previous.model ?? MODEL,
+    // 未记录请求配置的回复，续写时使用当前生效模型和开关。
+    model: (previous.model ?? resolvedModel()) as ChatModel | null,
     thinking: previous.thinking ?? thinking,
     search: previous.search ?? search,
     status: 'pending',
@@ -1023,7 +1026,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
         const events = streamMessage(
           useSettings.getState().apiKey ?? '',
           {
-            model: initial.model ?? MODEL,
+            model: initial.model ?? requestModel(),
             system: SYSTEM_PROMPT,
             messages,
             thinking: { type: initial.thinking ? 'enabled' : 'disabled' },

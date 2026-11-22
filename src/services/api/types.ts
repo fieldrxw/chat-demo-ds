@@ -5,6 +5,10 @@
  */
 
 export type ChatModel = 'deepseek-flash' | 'deepseek-v4-pro'
+/**
+ * 请求体层的模型名：第三方端点可配置任意模型名（FR-2），字面量类型只保留给本地消息记录。
+ */
+export type RequestModel = string
 
 // ---------- 响应：内容块 ----------
 
@@ -173,7 +177,7 @@ export type DeepseekReadUrlTool = {
 }
 
 export type CreateMessageRequest = {
-  model: ChatModel
+  model: RequestModel
   system: string
   messages: MessageParam[]
   thinking: { type: 'enabled' | 'disabled' }

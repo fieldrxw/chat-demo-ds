@@ -35,3 +35,12 @@
   margin: 0 auto;
   padding-bottom: 24px;
 }
+
+/* 搜索定位（FR-4）：命中消息块描边高亮，约 2 秒后由脚本移除 */
+.locateHighlight {
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 2px var(--dsw-alias-brand-primary),
+    0 0 0 6px var(--dsw-alias-interactive-bg-hover-accent);
+  transition: box-shadow 0.3s ease;
+}
